@@ -76,6 +76,21 @@ class Chapter3Spec extends FlatSpec with Matchers {
     product3(List(1.0, 2.0, 4.0, 0.0, 10242342.0, 23847928.0, 293872938.0, 29387423.0, 28723984.0)) should be (0.0)
   }
 
+  //3.8
+  "foldRight" should "rebuild a list" in {
+    foldRight(List(1,2,3), Nil:List[Int])(Cons(_,_)) should be (List(1,2,3))
+  }
+
+  "length" should "calculate length correctly" in {
+    Chapter3.length(Nil) should be (0)
+    Chapter3.length(List(6)) should be (1)
+    Chapter3.length(List(2, 3, 4, 6, 8, 23, 3, 2)) should be (8)
+  }
+
+  "foldLeft" should "fold correctly" in {
+    foldLeft(List(2, 3, 4), 1)(_ * _) should be (24)
+    foldLeft(List("a", "b", "c"), "")(_ + _) should be ("abc")
+  }
 
 }
 

@@ -105,5 +105,15 @@ object Chapter3 {
     }
 
   def product3(ns: List[Double]) = foldRightWStopper(ns, 1.0, {x: Double => x == 0.0})(_ * _)
+
+  //3.9
+  def length[A](as: List[A]): Int = foldRight(as, 0)((x, y) => y + 1)
+
+  //3.10
+  def foldLeft[A,B](as: List[A], z: B)(f: (B, A) => B): B =
+    as match {
+      case Nil => z
+      case Cons(x, xs) => foldLeft(xs, f(z, x))(f)
+    }
 }
 
