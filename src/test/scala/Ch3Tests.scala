@@ -60,5 +60,22 @@ class Chapter3Spec extends FlatSpec with Matchers {
     dropWhile(List(5, 2, 3, 7, 2), even) should be (List(5, 3, 7))
   }
 
+  "init" should "throw exception for Nil" in {
+    a[CallForNilException] should be thrownBy {
+      init(Nil)
+    }
+  }
+
+  it should "return initial list correctly" in {
+    init(List(5)) should be (Nil)
+    init(List(5, 4, 3, 6)) should be (List(5, 4, 3))
+  }
+
+  "product3" should "multiply correctly" in {
+    product3(List(1.0, 2.0, 4.0)) should be (8.0)
+    product3(List(1.0, 2.0, 4.0, 0.0, 10242342.0, 23847928.0, 293872938.0, 29387423.0, 28723984.0)) should be (0.0)
+  }
+
+
 }
 

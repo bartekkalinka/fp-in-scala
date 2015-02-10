@@ -54,19 +54,56 @@ object Chapter3 {
     }
   }
 
-  //3.5
-  def dropWhile[A](l: List[A], f: A => Boolean): List[A] = {
-    def dropRev(k: List[A], g: A => Boolean) = {
-      def dropAcc(m: List[A], acc: List[A]): List[A] = {
-        m match {
-          case Nil => acc
-          case Cons(h, t) => dropAcc(t, if (f(h)) acc else Cons(h, acc))
-        }
+  def reverse[A](l: List[A]) = {
+    def revAcc(k: List[A], acc: List[A]): List[A] = {
+      k match {
+        case Nil => acc
+        case Cons(h, t) => revAcc(t, Cons(h, acc))
       }
-      dropAcc(k, Nil)
     }
-    dropRev(dropRev(l, f), {x => true})
+    revAcc(l, Nil)
   }
 
+  //3.5
+  def dropWhile[A](l: List[A], f: A => Boolean): List[A] = {
+    def dropAcc(m: List[A], acc: List[A]): List[A] = {
+      m match {
+        case Nil => acc
+        case Cons(h, t) => dropAcc(t, if (f(h)) acc else Cons(h, acc))
+      }
+    }
+    reverse(dropAcc(l, Nil))
+  }
+
+  //3.6
+  def init[A](l: List[A]): List[A] = {
+    def initAcc(k: List[A], acc: List[A]): List[A] = {
+      k match {
+        case Nil => throw new CallForNilException
+        case Cons(h, Nil) => acc
+        case Cons(h, t) => initAcc(t, Cons(h, acc))
+      }
+    }
+    reverse(initAcc(l, Nil))
+  }
+
+  def foldRight[A,B](as: List[A], z: B)(f: (A, B) => B): B =
+    as match {
+        case Nil => z
+      case Cons(x, xs) => f(x, foldRight(xs, z)(f))
+    }
+
+  def sum2(ns: List[Int]) = foldRight(ns, 0)((x,y) => x + y)
+
+  def product2(ns: List[Double]) = foldRight(ns, 1.0)(_ * _)
+
+  //3.7
+  def foldRightWStopper[A,B](as: List[A], z: B, stopper: A => Boolean)(f: (A, B) => B): B =
+    as match {
+      case Nil => z
+      case Cons(x, xs) => if(stopper(x)) f(x, z) else f(x, foldRight(xs, z)(f))
+    }
+
+  def product3(ns: List[Double]) = foldRightWStopper(ns, 1.0, {x: Double => x == 0.0})(_ * _)
 }
 
