@@ -54,5 +54,19 @@ object Chapter3 {
     }
   }
 
+  //3.5
+  def dropWhile[A](l: List[A], f: A => Boolean): List[A] = {
+    def dropRev(k: List[A], g: A => Boolean) = {
+      def dropAcc(m: List[A], acc: List[A]): List[A] = {
+        m match {
+          case Nil => acc
+          case Cons(h, t) => dropAcc(t, if (f(h)) acc else Cons(h, acc))
+        }
+      }
+      dropAcc(k, Nil)
+    }
+    dropRev(dropRev(l, f), {x => true})
+  }
+
 }
 
