@@ -22,6 +22,7 @@ object List {
 }
 
 class CallForNilException extends Exception
+class UnequalListsException extends Exception
 
 object Chapter3 {
   //3.1
@@ -147,6 +148,119 @@ object Chapter3 {
       }
     )
   }
+
+  //3.16
+  def add1(l: List[Int]): List[Int] = {
+    def add1Acc(l: List[Int], acc: List[Int]): List[Int] = l match {
+      case Cons(h, t) => add1Acc(t, Cons(h + 1, acc))
+      case Nil => acc
+    }
+    reverseFold(add1Acc(l, Nil))
+  }
+
+  //3.17
+  def allToString(l: List[Double]): List[String] = {
+    def toStrAcc(l: List[Double], acc: List[String]): List[String] = l match {
+      case Cons(h, t) => toStrAcc(t, Cons(h.toString, acc))
+      case Nil => acc
+    }
+    reverseFold(toStrAcc(l, Nil))
+  }
+
+  //3.18
+  def map[A,B](as: List[A])(f: A => B): List[B] = {
+    def mapAcc(l: List[A], acc: List[B]): List[B] = l match {
+      case Cons(h, t) => mapAcc(t, Cons(f(h), acc))
+      case Nil => acc
+    }
+    reverseFold(mapAcc(as, Nil))
+  }
+
+  //3.19
+  def filter[A](as: List[A])(f: A => Boolean): List[A] = {
+    def filterAcc(l: List[A], acc: List[A]): List[A] = l match {
+      case Cons(h, t) => if(f(h)) filterAcc(t, Cons(h, acc)) else filterAcc(t, acc)
+      case Nil => acc
+    }
+    reverseFold(filterAcc(as, Nil))
+  }
+
+  //3.20
+  def flatMap[A,B](as: List[A])(f: A => List[B]): List[B] = flatten(map(as)(f))
+
+  //3.21
+  def filter2[A](as: List[A])(f: A => Boolean): List[A] = flatMap(as){elem: A => if(f(elem)) List(elem) else Nil}
+
+  //3.22
+  def addLists(l1: List[Int], l2: List[Int]) = {
+    def addAcc(l1: List[Int], l2: List[Int], acc: List[Int]): List[Int] = (l1, l2) match {
+      case (Cons(h1, t1), Cons(h2, t2)) => addAcc(t1, t2, Cons(h1 + h2, acc))
+      case (Nil, Nil) => acc
+      case _ => throw new UnequalListsException
+    }
+    reverseFold(addAcc(l1, l2, Nil))
+  }
+
+  //3.23
+  def zipWith[A,B,C](l1: List[A], l2: List[B])(f: (A, B) => C): List[C] = {
+    def zipAcc(l1: List[A], l2: List[B], acc: List[C]): List[C] = (l1, l2) match {
+      case (Cons(h1, t1), Cons(h2, t2)) => zipAcc(t1, t2, Cons(f(h1, h2), acc))
+      case (Nil, Nil) => acc
+      case _ => throw new UnequalListsException
+    }
+    reverseFold(zipAcc(l1, l2, Nil))
+  }
+
+  //3.24
+  def hasSubsequence[A](sup: List[A], sub: List[A]): Boolean = (sup, sub) match {
+    case (Cons(h1, t1), Cons(h2, t2)) => (h1 == h2 && hasSubsequence(t1, t2)) || hasSubsequence(t1, sub)
+    case (_, Nil) => true
+    case (Nil, _) => false
+  }
+
+
+  sealed trait Tree[+A]
+  case class Leaf[A](value: A) extends Tree[A]
+  case class Branch[A](left: Tree[A], right: Tree[A]) extends Tree[A]
+
+  //3.25
+  def size[A](t: Tree[A]): Int = t match {
+    case Leaf(_) => 1
+    case Branch(left, right) => size(left) + size(right)
+  }
+
+  //3.26
+  def max(t: Tree[Int]): Int = t match {
+    case Leaf(x) => x
+    case Branch(left, right) => max(left) max max(right)
+  }
+
+  //3.27
+  def depth[A](t: Tree[A]): Int = t match {
+    case Leaf(_) => 0
+    case Branch(left, right) => (depth(left) + 1) max (depth(right) + 1)
+  }
+
+  //3.28
+  def map[A,B](t:Tree[A])(f: A => B): Tree[B] = t match {
+    case Leaf(x) => Leaf(f(x))
+    case Branch(left, right) => Branch(map(left)(f), map(right)(f))
+  }
+
+  //3.29
+  def fold[A,B](t:Tree[A])(f: A => B, g: B => B, h: (B, B) => B): B = t match {
+    case Leaf(x) => f(x)
+    case Branch(left, right) => h(g(fold(left)(f, g, h)), g(fold(right)(f, g, h)))
+  }
+
+  def sizeFold[A](t: Tree[A]): Int = fold[A, Int](t)({x => 1}, {x => x}, {(left, right) => left + right})
+
+  def mapFold[A,B](t:Tree[A])(f: A => B): Tree[B] =
+    fold[A, Tree[B]](t)({x => Leaf(f(x))}, {x => x}, {(left: Tree[B], right: Tree[B]) => Branch(left, right)} )
+
+  def maxFold(t: Tree[Int]): Int = fold[Int, Int](t)({x => x}, {x => x}, {(left, right) => left max right})
+
+  def depthFold[A](t: Tree[A]): Int = fold[A, Int](t)({x => 0}, {x => x + 1}, {(left, right) => left max right})
 
 }
 
