@@ -89,7 +89,7 @@ object Chapter3 {
 
   def foldRight[A,B](as: List[A], z: B)(f: (A, B) => B): B =
     as match {
-        case Nil => z
+      case Nil => z
       case Cons(x, xs) => f(x, foldRight(xs, z)(f))
     }
 
@@ -115,5 +115,38 @@ object Chapter3 {
       case Nil => z
       case Cons(x, xs) => foldLeft(xs, f(z, x))(f)
     }
+
+  //3.11
+  def productLeft(ns: List[Double]) = foldLeft(ns, 1.0)(_ * _)
+  def sumLeft(ns: List[Int]) = foldLeft(ns, 0)((x,y) => x + y)
+  def lengthLeft[A](as: List[A]): Int = foldRight(as, 0)((x, y) => y + 1)
+
+  //3.12
+  def reverseFold[A](l: List[A]): List[A] = foldLeft(l, Nil: List[A])((acc: List[A], elem: A) => Cons(elem, acc))
+
+  //3.13
+  def foldRightL[A,B](as: List[A], z: B)(f: (A, B) => B): B = {
+    val rev = foldLeft(as, Nil: List[A])((acc: List[A], elem: A) => Cons(elem, acc))
+    foldLeft[A, B](rev ,z){(b: B, a: A) => f(a, b)}
+  }
+
+  //3.14
+  def append[A](l1: List[A], l2: List[A]) = {
+    val rev1 = reverseFold(l1)
+    val revSum = foldLeft(l2, rev1)((acc: List[A], elem: A) => Cons(elem, acc))
+    reverseFold(revSum)
+  }
+
+  //3.15
+  def flatten[A](l: List[List[A]]): List[A] = {
+    reverseFold(
+      foldLeft(l, Nil: List[A])
+      {
+        (sum, elemList) =>
+          foldLeft(elemList, sum)((acc: List[A], elem: A) => Cons(elem, acc))
+      }
+    )
+  }
+
 }
 

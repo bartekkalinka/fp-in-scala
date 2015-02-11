@@ -6,12 +6,12 @@ import fp.Chapter2
  */
 class Chapter2Spec extends FlatSpec with Matchers {
   "fib" should "calculate fibonacci correctly" in {
-    Chapter2.fib(2) should be (2)
-    Chapter2.fib(3) should be (3)
-    Chapter2.fib(4) should be (5)
-    Chapter2.fib(5) should be (8)
-    Chapter2.fib(6) should be (13)
-    Chapter2.fib(7) should be (21)
+    Chapter2.fib(3) should be (2)
+    Chapter2.fib(4) should be (3)
+    Chapter2.fib(5) should be (5)
+    Chapter2.fib(6) should be (8)
+    Chapter2.fib(7) should be (13)
+    Chapter2.fib(8) should be (21)
   }
 
   "isSorted" should "check for integer array ordering correctly" in {

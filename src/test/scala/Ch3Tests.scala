@@ -71,9 +71,13 @@ class Chapter3Spec extends FlatSpec with Matchers {
     init(List(5, 4, 3, 6)) should be (List(5, 4, 3))
   }
 
+  def correctProduct(prod: List[Double] => Double) = {
+    prod(List(1.0, 2.0, 4.0)) should be (8.0)
+    prod(List(1.0, 2.0, 4.0, 0.0, 10242342.0, 23847928.0, 293872938.0, 29387423.0, 28723984.0)) should be (0.0)
+  }
+
   "product3" should "multiply correctly" in {
-    product3(List(1.0, 2.0, 4.0)) should be (8.0)
-    product3(List(1.0, 2.0, 4.0, 0.0, 10242342.0, 23847928.0, 293872938.0, 29387423.0, 28723984.0)) should be (0.0)
+    correctProduct(product3)
   }
 
   //3.8
@@ -81,10 +85,14 @@ class Chapter3Spec extends FlatSpec with Matchers {
     foldRight(List(1,2,3), Nil:List[Int])(Cons(_,_)) should be (List(1,2,3))
   }
 
+  def correctLength(len: List[Int] => Int) = {
+    len(Nil) should be (0)
+    len(List(6)) should be (1)
+    len(List(2, 3, 4, 6, 8, 23, 3, 2)) should be (8)
+  }
+
   "length" should "calculate length correctly" in {
-    Chapter3.length(Nil) should be (0)
-    Chapter3.length(List(6)) should be (1)
-    Chapter3.length(List(2, 3, 4, 6, 8, 23, 3, 2)) should be (8)
+    correctLength(Chapter3.length)
   }
 
   "foldLeft" should "fold correctly" in {
@@ -92,5 +100,34 @@ class Chapter3Spec extends FlatSpec with Matchers {
     foldLeft(List("a", "b", "c"), "")(_ + _) should be ("abc")
   }
 
+  "productLeft" should "multiply correctly" in {
+    correctProduct(productLeft)
+  }
+
+  "sumLeft" should "sum correctly" in {
+    sumLeft(List(5, 1, 66)) should be (72)
+    sumLeft(Nil) should be (0)
+  }
+
+  "lengthLeft" should "calculate length correctly" in {
+    correctLength(lengthLeft)
+  }
+
+  "reverseFold" should "reverse correctly" in {
+    reverseFold(List(1, 2, 3, 4)) should be (List(4, 3, 2, 1))
+    reverseFold(Nil) should be (Nil)
+  }
+
+  "foldRightL" should "fold a list from right to left" in {
+    foldRightL(List(1, 2, 3), (1.0, 0.0)){(elem, acc) => acc match {case (m, s) => (m * 0.1, s + m * elem)}}._2 should be (3.21)
+  }
+
+  "append" should "append correctly" in {
+    append(List(4, 3, 4), List(1, 5, 6)) should be (List(4, 3, 4, 1, 5, 6))
+  }
+
+  "flatten" should "flatten correctly" in {
+    flatten(List(List(1, 2, 3), List(2, 3, 4), Nil, List(7, 8, 9))) should be (List(1, 2, 3, 2, 3, 4, 7, 8, 9))
+  }
 }
 

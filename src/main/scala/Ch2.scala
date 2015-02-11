@@ -6,7 +6,7 @@ object Chapter2 {
     def fibAcc(k: Int, f1: Int, f2: Int): Int = {
       if(k < n) fibAcc(k + 1, f1 + f2, f1) else f2
     }
-    fibAcc(0, 1, 1)
+    fibAcc(0, 1, 0)
   }
 
   //2.2
