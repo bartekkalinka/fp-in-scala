@@ -92,5 +92,45 @@ object Chapter4 {
     def map2[EE >: Nothing, B, C](b: Either[EE, B])(f: (A, B) => C):Either[EE, C] = b.map[C]({bb: B => f(value, bb)})
   }
 
+  //4.7
+  def traverseE[E, A, B](as: List[A])(
+    f: A => Either[E, B]): Either[E, List[B]] = foldLeft[A, Either[E, List[B]]](as, Right(Nil))((acc, k) =>
+    (acc, f(k)) match {
+      case (Right(_acc), Right(l)) => Right(Cons(l, _acc))
+      case (_, Left(e)) => Left(e)
+      case (Left(e), _) => Left(e)
+    }
+  ).map(reverseFold[B])
+
+  def TryE[A](a: => A): Either[Exception, A] =
+    try Right(a)
+    catch { case e: Exception => Left(e) }
+
+  def sequenceE[E, A](es: List[Either[E, A]]): Either[E, List[A]] = traverseE[E, Either[E, A], A](es)({opt => opt})
+
+  //4.8
+  case class Person(name: Name, age: Age)
+  sealed class Name(val value: String)
+  sealed class Age(val value: Int)
+
+  def mkName(name: String): Either[String, Name] =
+    if (name == "" || name == null) Left("Name is empty.")
+    else Right(new Name(name))
+
+  def mkAge(age: Int): Either[String, Age] =
+    if (age < 0) Left("Age is out of range.")
+    else Right(new Age(age))
+
+  def map3[E, F, A, B, C](a: Either[E, A], b: Either[E, B], eacc: F)(f: (A, B) => C, g: (F, E) => F):Either[F, C] =
+    (a, b) match {
+      case (Right(r1), Right(r2)) => Right(f(r1, r2))
+      case (Left(e1), Right(r2)) => Left(g(eacc, e1))
+      case (Right(r1), Left(e2)) => Left(g(eacc, e2))
+      case (Left(e1), Left(e2)) => Left(foldLeft[E, F](List(e2, e1), eacc)(g))
+    }
+
+  def mkPerson(name: String, age: Int): Either[List[String], Person] =
+    map3(mkName(name), mkAge(age), Nil: List[String])(Person(_, _), {(f, e) => Cons(e, f)})
+
 }
 

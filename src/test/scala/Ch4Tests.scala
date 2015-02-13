@@ -1,6 +1,9 @@
 /**
  * Created by bka on 2015-02-11.
  */
+
+import java.lang.Exception
+
 import org.scalatest.{Matchers, FlatSpec}
 import fp._
 
@@ -112,6 +115,21 @@ class Chapter4Spec extends FlatSpec with Matchers {
     evenRight(3).map2(evenRight(2))(_ + _) should be (Left("odd"))
     oddRight(3).map2(oddRight(2))(_ + _) should be (Left("even"))
     oddRight(3).map2(oddRight(5))(_ + _) should be (Right(8))
+  }
+
+  "sequenceE" should "push alternative outside of list" in {
+    sequenceE(List(Right(1), Right(2), Right(3))) should be (Right(List(1, 2, 3)))
+    sequenceE(List(Right(1), Left("none"), Right(3))) should be (Left("none"))
+    sequenceE(List()) should be (Right(List()))
+  }
+
+  "traverseE" should "traverse list with function and push alternative outside of list" in {
+    traverseE[Exception, String, Int](List("1", "2", "3"))({x => TryE(x.toInt)}) should be (Right(List(1, 2, 3)))
+    traverseE[Exception, String, Int](List("1", "2", "a"))({x => TryE(x.toInt)}) should matchPattern { case Left(_) => }
+  }
+
+  "mkPerson" should "list all exceptions" in {
+    mkPerson("", -5) should be (Left(List("Name is empty.", "Age is out of range.")))
   }
 
 }
