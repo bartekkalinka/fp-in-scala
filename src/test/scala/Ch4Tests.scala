@@ -9,6 +9,7 @@ import fp._
 
 class Chapter4Spec extends FlatSpec with Matchers {
 
+  import Chapter3._
   import Chapter4._
 
   def getIfEven(i: Int) = {if(i % 2 == 0) Some(i) else None}
