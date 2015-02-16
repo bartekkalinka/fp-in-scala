@@ -21,10 +21,25 @@ class Chapter5Spec extends FlatSpec with Matchers {
     Stream(1, 2).drop(2) should be (Empty)
   }
 
-  "takeWhile" should "take all elements that match" in {
-    Stream(1, 3, 5, 8, 9, 11).takeWhile(_ % 2 == 1).toList should be (List(1, 3, 5))
-    Stream(2, 1, 3).takeWhile(_ % 2 == 1) should be (Empty)
-    Stream[Int]().takeWhile(_ % 2 == 1) should be (Empty)
+  def correctTakeWhile(takewhile: (Stream[Int], Int => Boolean) => Stream[Int]) = {
+    takewhile(Stream(1, 3, 5, 8, 9, 11), (_ % 2 == 1)).toList should be (List(1, 3, 5))
+    takewhile(Stream(2, 1, 3), (_ % 2 == 1)) should be (Empty)
+    takewhile(Stream[Int](), (_ % 2 == 1)) should be (Empty)
+
   }
+
+  "takeWhile" should "take all elements that match" in {
+    correctTakeWhile((s: Stream[Int], p) => s.takeWhile(p))
+  }
+
+  "forAll" should "check if all elements match a predicate" in {
+    Stream(1, 3, 5, 11, 9, 9, 7).forAll(_ % 2 == 1) should be (true)
+    Stream(1, 2, 5, 11, 9, 9, 7).forAll(_ % 2 == 1) should be (false)
+  }
+
+  "takeWhile2" should "take all elements that match" in {
+    correctTakeWhile((s: Stream[Int], p) => s.takeWhile2(p))
+  }
+
 
 }

@@ -19,6 +19,7 @@ class Chapter4Spec extends FlatSpec with Matchers {
     getIfEven(2).map {_.toString} should be (Some("2"))
     getIfEven(1).map {_.toString} should be (None)
   }
+
   "getOrElse" should "return the result inside the Some case of the Option" in {
     getIfEven(2).getOrElse(5) should be (2)
   }
