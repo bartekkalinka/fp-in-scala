@@ -41,5 +41,11 @@ class Chapter5Spec extends FlatSpec with Matchers {
     correctTakeWhile((s: Stream[Int], p) => s.takeWhile2(p))
   }
 
+  "headOption2" should "return head for non-empty list" in {
+    Stream(5, 2, 3).headOption2 should be (Some(5))
+  }
 
+  it should "return None for empty list" in {
+    Empty.headOption2 should be (None)
+  }
 }

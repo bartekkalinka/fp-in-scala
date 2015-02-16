@@ -34,6 +34,9 @@ object Chapter5 {
     //5.5
     def takeWhile2(p: A => Boolean): Stream[A] =
       foldRight(Stream[A]())((a, b) => if(p(a)) Cons(() => a, () => b.takeWhile2(p)) else Empty)
+
+    //5.6
+    def headOption2: Option[A] = foldRight[Option[A]](None)((a, b) => Some(a))
  }
   case object Empty extends Stream[Nothing] {
     def headOption: Option[Nothing] = None
