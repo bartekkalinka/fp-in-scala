@@ -48,4 +48,39 @@ class Chapter5Spec extends FlatSpec with Matchers {
   it should "return None for empty list" in {
     Empty.headOption2 should be (None)
   }
+
+  "map" should "transform stream elements" in {
+    Stream("1", "5", "9").map(_.toInt).toList should be (List(1, 5, 9))
+  }
+
+  "filter" should "leave elements that match predicate" in {
+    Stream(1, 2, 3, 4, 5, 6).filter(_ % 2 == 0).toList should be (List(2, 4, 6))
+  }
+
+  "append" should "put another stream at the end" in {
+    Stream(1, 2, 3).append(Stream(4, 5, 6)).toList should be (List(1, 2, 3, 4, 5, 6))
+  }
+
+  "flatMap" should "aggregate all streams from transformation of elements" in {
+    Stream(1, 2, 3).flatMap(Stream(_)).toList should be (List(1, 2, 3))
+  }
+
+  "constant" should "provide as long Stream of repeated element as wanted" in {
+    constant(6).take(3) should be (List(6, 6, 6))
+  }
+
+  "from" should "provide any number of ascending integers" in {
+    from(1).take(8) should be (List(1, 2, 3, 4, 5, 6, 7, 8))
+  }
+
+  "fib" should "provide any number of Fibonacci numbers" in {
+    fibs.take(7) should be (List(0, 1, 1, 2, 3, 5, 8))
+  }
+
+  /*
+  "ones2" should "provide any number of 1s" in {
+    ones2.take(3) should be (List(1, 1, 1))
+  }
+  */
+
 }
