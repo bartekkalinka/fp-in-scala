@@ -65,22 +65,44 @@ class Chapter5Spec extends FlatSpec with Matchers {
     Stream(1, 2, 3).flatMap(Stream(_)).toList should be (List(1, 2, 3))
   }
 
+  def correctConstant(const: Int => Stream[Int]) = {
+    const(6).take(3) should be (List(6, 6, 6))
+  }
+
   "constant" should "provide as long Stream of repeated element as wanted" in {
-    constant(6).take(3) should be (List(6, 6, 6))
+    correctConstant(constant)
+  }
+
+  "constant2" should "provide as long Stream of repeated element as wanted" in {
+    correctConstant(constant2)
+  }
+
+  def correctFrom(fr: Int => Stream[Int]) = {
+    fr(1).take(8) should be (List(1, 2, 3, 4, 5, 6, 7, 8))
   }
 
   "from" should "provide any number of ascending integers" in {
-    from(1).take(8) should be (List(1, 2, 3, 4, 5, 6, 7, 8))
+    correctFrom(from)
   }
 
-  "fib" should "provide any number of Fibonacci numbers" in {
-    fibs.take(7) should be (List(0, 1, 1, 2, 3, 5, 8))
+  "from2" should "provide any number of ascending integers" in {
+    correctFrom(from2)
   }
 
-  /*
+  def correctFibs(fibz: Stream[Int]) = {
+    fibz.take(7) should be (List(0, 1, 1, 2, 3, 5, 8))
+  }
+
+  "fibs" should "provide any number of Fibonacci numbers" in {
+    correctFibs(fibs)
+  }
+
+  "fibs2" should "provide any number of Fibonacci numbers" in {
+    correctFibs(fibs2)
+  }
+
   "ones2" should "provide any number of 1s" in {
     ones2.take(3) should be (List(1, 1, 1))
   }
-  */
 
 }

@@ -114,5 +114,12 @@ object Chapter5 {
   }
 
   //5.12
-  //def ones2 = unfold[Int, ()](())({a: () => Some((1, ()))})
+  def ones2 = unfold[Int, Unit](())({case () => Some((1, ()))})
+
+  def constant2[A](a: A): Stream[A] = unfold[A, Unit](())({case () => Some((a, ()))})
+
+  def from2(n: Int): Stream[Int] = unfold[Int, Int](n)(a => Some(a, a + 1))
+
+  val fibs2: Stream[Int] = unfold[Int, (Int, Int)]((0, 1)){case (n1, n2) => Some((n1, (n2, n1 + n2)))}
+
 }
