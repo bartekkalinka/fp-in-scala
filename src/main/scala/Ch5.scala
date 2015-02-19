@@ -48,6 +48,20 @@ object Chapter5 {
     def append[AA >: A](s: => Stream[AA]): Stream[AA] = foldRight[Stream[AA]](s)((a, b) => Cons(() => a, () => b))
 
     def flatMap[B](f: A => Stream[B]): Stream[B] = foldRight[Stream[B]](Empty)((a, b) => f(a).append(b))
+
+    //5.13
+    //def unfold[A, S](z: S)(f: S => Option[(A, S)]): Stream[A]
+    def mapUnfold[B](f: A => B): Stream[B] = unfold[B, Stream[A]](this)({case Cons(h, t) => Some((f(h()), t())); case _ => None})
+
+    def takeUnfold(n: Int): List[A] =
+      unfold[A, (Stream[A], Int)]((this, n))({
+        case (Cons(h, t), k) => if(k > 0) Some(h(), (t(), k - 1)) else None
+        case _ => None
+      }).toList
+
+    //def takeWhileUnfold()
+    //map, take, takeWhile, zipWith
+    //def zipAll[B](s2: Stream[B]): Stream[(Option[A],Option[B])]
   }
 
   case object Empty extends Stream[Nothing] {
@@ -121,5 +135,6 @@ object Chapter5 {
   def from2(n: Int): Stream[Int] = unfold[Int, Int](n)(a => Some(a, a + 1))
 
   val fibs2: Stream[Int] = unfold[Int, (Int, Int)]((0, 1)){case (n1, n2) => Some((n1, (n2, n1 + n2)))}
+
 
 }

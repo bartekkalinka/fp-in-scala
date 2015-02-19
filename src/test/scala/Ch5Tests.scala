@@ -11,9 +11,13 @@ class Chapter5Spec extends FlatSpec with Matchers {
     Stream(1, 2, 3, 4, 5, 6, 7).toList should be (List(1, 2, 3, 4, 5, 6, 7))
   }
 
+  def correctTake(t: Stream[Int] => Int => List[Int]) = {
+    t(Stream(1, 2, 3, 4, 5, 6, 7))(2) should be (List(1, 2))
+    t(Stream(1, 2))(2) should be (List(1, 2))
+  }
+
   "take" should "force evaluation of first n elements" in {
-    Stream(1, 2, 3, 4, 5, 6, 7).take(2) should be (List(1, 2))
-    Stream(1, 2).take(2) should be (List(1, 2))
+    correctTake(_.take)
   }
 
   "drop" should "drop first n elements" in {
@@ -49,8 +53,12 @@ class Chapter5Spec extends FlatSpec with Matchers {
     Empty.headOption2 should be (None)
   }
 
+  def correctMap(m: Stream[String] => (String => Int) => Stream[Int]) = {
+    m(Stream("1", "5", "9"))(_.toInt).toList should be (List(1, 5, 9))
+  }
+
   "map" should "transform stream elements" in {
-    Stream("1", "5", "9").map(_.toInt).toList should be (List(1, 5, 9))
+    correctMap(_.map)
   }
 
   "filter" should "leave elements that match predicate" in {
@@ -104,5 +112,14 @@ class Chapter5Spec extends FlatSpec with Matchers {
   "ones2" should "provide any number of 1s" in {
     ones2.take(3) should be (List(1, 1, 1))
   }
+
+  "mapUnfold" should "transform stream elements" in {
+    correctMap(_.mapUnfold)
+  }
+
+  "takeUnfold" should "force evaluation of first n elements" in {
+    correctTake(_.takeUnfold)
+  }
+
 
 }
