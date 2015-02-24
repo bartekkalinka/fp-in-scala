@@ -121,5 +121,33 @@ class Chapter5Spec extends FlatSpec with Matchers {
     correctTake(_.takeUnfold)
   }
 
+  "takeWhileUnfold" should "take all elements that match" in {
+    correctTakeWhile((s: Stream[Int], p) => s.takeWhileUnfold(p))
+  }
+
+  "zipWith" should "act like addLists in one specific case" in {
+    Stream(1, 2, 3).zipWith(Stream(5, 4, 5))(_ + _).toList should be (List(6, 6, 8))
+  }
+
+  "zipAll" should "exhaust both streams in option stream" in {
+    Stream(1, 2, 3, 4).zipAll(Stream(4, 3, 2, 1)).map({case (Some(a), Some(b)) => a + b; case _ => 0}).toList should be (List(5, 5, 5, 5))
+    Stream(1, 2, 3, 4).zipAll(Stream(4, 3, 2)).map({case (Some(a), Some(b)) => a + b; case _ => 0}).toList should be (List(5, 5, 5, 0))
+    Stream(1, 2, 3).zipAll(Stream(4, 3, 2, 1)).toList.last._2 should be (Some(1))
+  }
+
+  "startsWith" should "check if second stream is a prefix" in {
+    Stream(1, 2, 3, 4, 5).startsWith(Stream(1, 2, 3)) should be (true)
+    Stream(1, 2, 3, 4, 5).startsWith(Stream(1, 2, 3, 4, 5)) should be (true)
+    Stream(1, 2, 3, 4).startsWith(Stream(1, 2, 3, 4, 5)) should be (false)
+    Stream(1, 2, 3, 4, 5).startsWith(Stream(1, 2, 3, 4, 4)) should be (false)
+  }
+
+  "tails" should "return all suffixes" in {
+    Stream(1, 2, 3, 4, 5).tails.map(_.toList).toList should be (List(List(1, 2, 3, 4, 5), List(2, 3, 4, 5), List(3, 4, 5), List (4, 5), List(5)))
+  }
+
+  "scanRight" should "return all partial accumulators" in {
+    Stream(1,2,3).scanRight(0)(_ + _).toList should be (List(6,5,3,0))
+  }
 
 }

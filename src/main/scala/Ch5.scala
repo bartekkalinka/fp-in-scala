@@ -59,9 +59,38 @@ object Chapter5 {
         case _ => None
       }).toList
 
-    //def takeWhileUnfold()
-    //map, take, takeWhile, zipWith
-    //def zipAll[B](s2: Stream[B]): Stream[(Option[A],Option[B])]
+    def takeWhileUnfold(p: A => Boolean): Stream[A] = unfold[A, Stream[A]](this)({
+      case Cons(h, t) => if(p(h())) Some(h(), t()) else None
+      case _ => None
+    })
+
+    def zipWith[B,C](s2: Stream[B])(f: (A, B) => C): Stream[C] = unfold[C, (Stream[A], Stream[B])](this, s2)({
+      case (Cons(h1, t1), Cons(h2, t2)) => Some(f(h1(), h2()), (t1(), t2()))
+      case _ => None
+    })
+
+    def zipAll[B](s2: Stream[B]): Stream[(Option[A],Option[B])] = unfold[(Option[A],Option[B]), (Stream[A], Stream[B])](this, s2)({
+      case (Cons(h1, t1), Cons(h2, t2)) => Some((Some(h1()), Some(h2())), (t1(), t2()))
+      case (Cons(h1, t1), Empty) => Some((Some(h1()), None), (t1(), Empty))
+      case (Empty, Cons(h2, t2)) => Some((None, Some(h2())), (Empty, t2()))
+      case _ => None
+    })
+
+    //5.14
+    def startsWith[A](s: Stream[A]): Boolean = zipAll(s).forAll({case (Some(a), Some(b)) => a == b; case (Some(_), None) => true; case _ => false})
+
+    //5.15
+    def tails: Stream[Stream[A]] = unfold[Stream[A], Stream[A]](this)({
+      case Cons(h, t) => Some(Cons(h, t), t())
+      case _ => None
+    })
+
+    //5.16
+    def scanRight[B](z: => B)(f: (A, => B) => B): Stream[B] = foldRight[Stream[B]](Empty)({
+      case (a, Empty) => Stream(f(a, z), z)
+      case (a, Cons(h, t)) => Stream.cons[B](f(a, h()), Cons(h, t))
+
+    })
   }
 
   case object Empty extends Stream[Nothing] {
