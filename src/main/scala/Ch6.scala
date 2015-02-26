@@ -154,6 +154,20 @@ object Chapter6 {
     }
   }
 
+  //6.11
+  sealed trait Input
+  case object Coin extends Input
+  case object Turn extends Input
+  case class Machine(locked: Boolean, candies: Int, coins: Int)
 
+  def simulateMachine(inputs: List[Input]): State[Machine, (Int, Int)] = {
+    def machineStep(input: Input, inpMach: Machine): Machine = input match {
+      case Turn => if(inpMach.locked) inpMach else Machine(true, inpMach.candies - 1, inpMach.coins)
+      case Coin => if(inpMach.locked && inpMach.candies > 0) Machine(false, inpMach.candies, inpMach.coins + 1) else inpMach
+    }
+    def step(input: Input): State[Machine, (Int, Int)] =
+      State { inpMach => val m = machineStep(input, inpMach); ((m.candies, m.coins), m) }
+    State.sequence(inputs.map(step(_))).map(_.last)
+  }
 
 }

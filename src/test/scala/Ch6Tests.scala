@@ -98,4 +98,10 @@ class Chapter6Spec extends FlatSpec with Matchers {
     State.sequence(List(is, is, is, is)).run(SimpleRNG(42))._1.reduce(_ + _) should be (sum4s.run(SimpleRNG(42))._1)
   }
 
+  "simulateMachine" should "return machine transistions according to rules" in {
+    simulateMachine(List(Coin, Turn)).run(Machine(true, 1, 0))._2 should be (Machine(true, 0 , 1))
+    simulateMachine(List(Turn, Turn, Coin)).run(Machine(true, 2, 0))._2 should be (Machine(false, 2, 1))
+    simulateMachine(List(Coin, Turn, Coin, Turn, Coin, Turn, Turn)).run(Machine(false, 2, 5))._2 should be (Machine(true, 0, 6))
+  }
+
 }
