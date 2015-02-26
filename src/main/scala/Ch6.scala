@@ -121,5 +121,39 @@ object Chapter6 {
       else nonNegativeLessThan2(n)
   })
 
+  //6.9
+  def mapFlat[A,B](s: Rand[A])(f: A => B): Rand[B] = flatMap[A, B](s)(a => (rng => (f(a), rng)))
+
+  def map2Flat[A,B,C](ra: Rand[A], rb: Rand[B])(f: (A, B) => C): Rand[C] =
+    flatMap[(A, B), C](rng => {val (a, rngb) = ra(rng); val (b, rngc) = rb(rngb); ((a, b), rngc)})({ case (a, b) => (rng => (f(a, b), rng))})
+
+  //6.10
+  case class State[S,+A](run: S => (A,S)) {
+    def flatMap[B](g: A => State[S, B]): State[S, B] =
+      State {s: S =>
+        val (a, s2) = run(s)
+        g(a).run(s2)
+      }
+
+    def map[B](f: A => B): State[S, B] = flatMap[B](a => State(s => (f(a), s)))
+
+    def map2[B,C](rb: State[S, B])(f: (A, B) => C): State[S, C] = State {
+        s =>
+        val (a, s2) = run(s)
+        val (b, s3) = rb.run(s2)
+        (f(a, b), s3)
+      }
+  }
+
+  object State {
+    def unit[S, A](a: A): State[S, A] = State {s: S => (a, s)}
+
+    def sequence[S, A](fs: List[State[S, A]]): State[S, List[A]] = fs match {
+      case Nil => unit(Nil)
+      case h :: t => h.map2(sequence(t))((a, b) => a :: b)
+    }
+  }
+
+
 
 }

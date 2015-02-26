@@ -70,4 +70,32 @@ class Chapter6Spec extends FlatSpec with Matchers {
   "nonNegativeLessThan implementations" should "behave the same" in {
     nonNegativeLessThan(100)(SimpleRNG(8332765))._1 should be (nonNegativeLessThan2(100)(SimpleRNG(8332765))._1)
   }
+
+  "mapFlat" should "behave like map" in {
+    mapFlat(nonNegativeInt)(i => i - i % 2)(SimpleRNG(723479827))._1 should be (map(nonNegativeInt)(i => i - i % 2)(SimpleRNG(723479827))._1)
+  }
+
+  "map2Flat" should "behave like map2" in {
+    map2Flat[Int, Double, Int](_.nextInt, double)((n, d) => (n / d).toInt)(SimpleRNG(42))._1 should be (
+      map2[Int, Double, Int](_.nextInt, double)((n, d) => (n / d).toInt)(SimpleRNG(42))._1
+    )
+  }
+
+  "State.map" should "behave like map(Rand)" in {
+    State[RNG, Int](nonNegativeInt).map({i: Int => i - i % 2}).run(SimpleRNG(723479827))._1 should be (map(nonNegativeInt)(i => i - i % 2)(SimpleRNG(723479827))._1)
+  }
+
+  "State.map2" should "behave like map2(Rand)" in {
+    State[RNG, Int](_.nextInt).map2[Double, Int](State(double))((n: Int, d: Double) => (n / d).toInt).run(SimpleRNG(42))._1 should be (
+      map2[Int, Double, Int](_.nextInt, double)((n, d) => (n / d).toInt)(SimpleRNG(42))._1
+    )
+  }
+
+  "State.sequence" should "behave like sequence(Rand)" in {
+    def is: State[RNG, Int] = State(_.nextInt)
+    def sums: State[RNG, Int] = is.map2(is)(_ + _)
+    def sum4s: State[RNG, Int] = sums.map2(sums)(_ + _)
+    State.sequence(List(is, is, is, is)).run(SimpleRNG(42))._1.reduce(_ + _) should be (sum4s.run(SimpleRNG(42))._1)
+  }
+
 }
