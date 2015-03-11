@@ -84,6 +84,15 @@ object Chapter7 {
       val f = par(es)
     }
 
+    //testing timeout on map2
+    //Chapter7.TestPar.test3(2, 1500L) ok
+    //Chapter7.TestPar.test3(2, 1400L) TimeoutException
+    def test3(threads: Integer, timeoutMillis: Long) = {
+      val es = Executors.newFixedThreadPool(threads)
+      val par = map2(sleepPrintPar("aaa", Duration(1000, "millis")), sleepPrintPar("bbb", Duration(1500, "millis")))({(_, _) => ()})
+      par(es).get(timeoutMillis, MILLISECONDS)
+    }
+
   }
 
 }
