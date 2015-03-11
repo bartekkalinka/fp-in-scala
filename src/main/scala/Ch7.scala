@@ -58,6 +58,7 @@ object Chapter7 {
     def sequence[A](ps: List[Par[A]]): Par[List[A]] = ps match {
       case h :: t => map2[A, List[A], List[A]](h, sequence[A](t))(_ :: _)
       case List(p) => map(p)(List(_))
+      case Nil => unit(Nil)
     }
   }
 
@@ -91,6 +92,14 @@ object Chapter7 {
       val es = Executors.newFixedThreadPool(threads)
       val par = map2(sleepPrintPar("aaa", Duration(1000, "millis")), sleepPrintPar("bbb", Duration(1500, "millis")))({(_, _) => ()})
       par(es).get(timeoutMillis, MILLISECONDS)
+    }
+
+    //sequence parallelism test
+    //Chapter7.TestPar.test4(4)
+    def test4(threads: Integer) = {
+      val es = Executors.newFixedThreadPool(threads)
+      val list = Range(1, 5).map(i => sleepPrintPar(i.toString, Duration((5 - i) * 100 + 4000, "millis"))).toList
+      sequence(list)(es)
     }
 
   }
