@@ -68,11 +68,22 @@ object Chapter7 {
 
     def sleepPrintPar(a: String, duration: Duration): Par[Unit] = lazyUnit({Thread.sleep(duration.toMillis); println(a)})
 
+    //showing parallel execution:
+    //for threads >= 2, output is: 1. bbb, 2. aaa
     def test1(threads: Integer) = {
       val es = Executors.newFixedThreadPool(threads)
       val f1 = sleepPrintPar("aaa", Duration(5000, "millis"))(es)
       val f2 = sleepPrintPar("bbb", Duration(1000, "millis"))(es)
     }
+
+    //showing map2 parallel execution:
+    //for threads >= 2, output is: 1. bbb, 2. aaa
+    def test2(threads: Integer) = {
+      val es = Executors.newFixedThreadPool(threads)
+      val par = map2(sleepPrintPar("aaa", Duration(5000, "millis")), sleepPrintPar("bbb", Duration(1000, "millis")))({(_, _) => ()})
+      val f = par(es)
+    }
+
   }
 
 }
