@@ -2,23 +2,9 @@
  * Created by bka on 07.03.15.
  */
 import scala.concurrent.duration._
-import java.util.concurrent.ExecutorService
+import java.util.concurrent._
 
 object Chapter7 {
-
-  trait ExecutorService {
-    def submit[A](a: Callable[A]): Future[A]
-  }
-
-  trait Callable[A] { def call: A }
-
-  trait Future[A] {
-    def get: A
-    def get(timeout: Long, unit: TimeUnit): A
-    def cancel(evenIfRunning: Boolean): Boolean
-    def isDone: Boolean
-    def isCancelled: Boolean
-  }
 
   type Par[A] = ExecutorService => Future[A]
 
@@ -79,6 +65,14 @@ object Chapter7 {
     import Par._
 
     def sleepPar[A](a: A, duration: Duration): Par[A] = lazyUnit({Thread.sleep(duration.toMillis); a})
+
+    def sleepPrintPar(a: String, duration: Duration): Par[Unit] = lazyUnit({Thread.sleep(duration.toMillis); println(a)})
+
+    def test1(threads: Integer) = {
+      val es = Executors.newFixedThreadPool(threads)
+      val f1 = sleepPrintPar("aaa", Duration(5000, "millis"))(es)
+      val f2 = sleepPrintPar("bbb", Duration(1000, "millis"))(es)
+    }
   }
 
 }
