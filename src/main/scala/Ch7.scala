@@ -65,8 +65,6 @@ object Chapter7 {
   object TestPar {
     import Par._
 
-    def sleepPar[A](a: A, duration: Duration): Par[A] = lazyUnit({Thread.sleep(duration.toMillis); a})
-
     def sleepPrintPar(a: String, duration: Duration): Par[Unit] = lazyUnit({Thread.sleep(duration.toMillis); println(a)})
 
     //showing parallel execution:
