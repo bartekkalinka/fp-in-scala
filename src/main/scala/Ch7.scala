@@ -60,10 +60,23 @@ object Chapter7 {
       case List(p) => map(p)(List(_))
       case Nil => unit(Nil)
     }
+
+    //7.6
+    def parFilter[A](as: List[A])(f: A => Boolean): Par[List[A]] =
+      map(
+        sequence(
+          as.map(a => lazyUnit(
+            if(f(a)) Some(a) else None)
+          )
+        )
+      )(_.flatten)
+
   }
 
   object TestPar {
     import Par._
+
+    def sleepInt(a: Int, duration: Duration): Par[Int] = lazyUnit({Thread.sleep(duration.toMillis); a})
 
     def sleepPrintPar(a: String, duration: Duration): Par[Unit] = lazyUnit({Thread.sleep(duration.toMillis); println(a)})
 
@@ -98,6 +111,15 @@ object Chapter7 {
       val es = Executors.newFixedThreadPool(threads)
       val list = Range(1, 5).map(i => sleepPrintPar(i.toString, Duration((5 - i) * 100 + 4000, "millis"))).toList
       sequence(list)(es)
+    }
+
+    //parFilter test of correctness + parallelism
+    def test5 = {
+      val es = Executors.newFixedThreadPool(4)
+      val par = parFilter(List(1, 2, 3, 4))({Thread.sleep(1500); _ % 2 == 0})
+      val start = System.currentTimeMillis()
+      println(par(es).get)
+      println(Duration(System.currentTimeMillis - start, MILLISECONDS))
     }
 
   }
