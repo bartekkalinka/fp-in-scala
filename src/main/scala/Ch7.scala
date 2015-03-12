@@ -1,6 +1,8 @@
 /**
  * Created by bka on 07.03.15.
  */
+package fp
+
 import scala.concurrent.duration._
 import java.util.concurrent._
 
@@ -76,50 +78,15 @@ object Chapter7 {
   object TestPar {
     import Par._
 
-    def sleepInt(a: Int, duration: Duration): Par[Int] = lazyUnit({Thread.sleep(duration.toMillis); a})
-
     def sleepPrintPar(a: String, duration: Duration): Par[Unit] = lazyUnit({Thread.sleep(duration.toMillis); println(a)})
 
-    //showing parallel execution:
-    //for threads >= 2, output is: 1. bbb, 2. aaa
-    def test1(threads: Integer) = {
-      val es = Executors.newFixedThreadPool(threads)
-      val f1 = sleepPrintPar("aaa", Duration(5000, "millis"))(es)
-      val f2 = sleepPrintPar("bbb", Duration(1000, "millis"))(es)
-    }
-
-    //showing map2 parallel execution:
-    //for threads >= 2, output is: 1. bbb, 2. aaa
-    def test2(threads: Integer) = {
-      val es = Executors.newFixedThreadPool(threads)
-      val par = map2(sleepPrintPar("aaa", Duration(5000, "millis")), sleepPrintPar("bbb", Duration(1000, "millis")))({(_, _) => ()})
-      val f = par(es)
-    }
-
-    //testing timeout on map2
-    //Chapter7.TestPar.test3(2, 1500L) ok
-    //Chapter7.TestPar.test3(2, 1400L) TimeoutException
-    def test3(threads: Integer, timeoutMillis: Long) = {
-      val es = Executors.newFixedThreadPool(threads)
-      val par = map2(sleepPrintPar("aaa", Duration(1000, "millis")), sleepPrintPar("bbb", Duration(1500, "millis")))({(_, _) => ()})
-      par(es).get(timeoutMillis, MILLISECONDS)
-    }
-
+    //TODO move to scalatest
     //sequence parallelism test
-    //Chapter7.TestPar.test4(4)
-    def test4(threads: Integer) = {
+    //Chapter7.TestPar.test1(4)
+    def test1(threads: Integer) = {
       val es = Executors.newFixedThreadPool(threads)
       val list = Range(1, 5).map(i => sleepPrintPar(i.toString, Duration((5 - i) * 100 + 4000, "millis"))).toList
       sequence(list)(es)
-    }
-
-    //parFilter test of correctness + parallelism
-    def test5 = {
-      val es = Executors.newFixedThreadPool(12)
-      val par = parFilter(List(1, 2, 3, 4, 5, 6))({a => Thread.sleep(1500); a % 2 == 0})
-      val start = System.currentTimeMillis()
-      println(par(es).get(1600, MILLISECONDS))
-      println(Duration(System.currentTimeMillis - start, MILLISECONDS))
     }
 
   }
