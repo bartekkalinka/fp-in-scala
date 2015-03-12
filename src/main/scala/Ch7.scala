@@ -115,10 +115,10 @@ object Chapter7 {
 
     //parFilter test of correctness + parallelism
     def test5 = {
-      val es = Executors.newFixedThreadPool(4)
-      val par = parFilter(List(1, 2, 3, 4))({Thread.sleep(1500); _ % 2 == 0})
+      val es = Executors.newFixedThreadPool(12)
+      val par = parFilter(List(1, 2, 3, 4, 5, 6))({a => Thread.sleep(1500); a % 2 == 0})
       val start = System.currentTimeMillis()
-      println(par(es).get)
+      println(par(es).get(1600, MILLISECONDS))
       println(Duration(System.currentTimeMillis - start, MILLISECONDS))
     }
 
