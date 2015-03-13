@@ -6,7 +6,7 @@ package fp
 import scala.concurrent.duration._
 import java.util.concurrent._
 
-object Chapter7 {
+object Chapter7Blocking {
 
   type Par[A] = ExecutorService => Future[A]
 
@@ -84,8 +84,8 @@ object Chapter7 {
 
     def sleepPrintPar(a: String, duration: Duration): Par[Unit] = lazyUnit({Thread.sleep(duration.toMillis); println(a)})
 
-    //fp.Chapter7.TestPar.deadlockDemo1(2) returns true
-    //fp.Chapter7.TestPar.deadlockDemo1(1) hangs
+    //fp.Chapter7Blocking.TestPar.deadlockDemo1(2) returns true
+    //fp.Chapter7Blocking.TestPar.deadlockDemo1(1) hangs
     def deadlockDemo1(threads: Int) = {
       val a = lazyUnit(42 + 1)
       val S = Executors.newFixedThreadPool(threads)
@@ -93,7 +93,7 @@ object Chapter7 {
     }
 
     //7.9
-    //fp.Chapter7.TestPar.deadlockDemo2(4) hangs
+    //fp.Chapter7Blocking.TestPar.deadlockDemo2(4) hangs
     def deadlockDemo2(threads: Int) = {
       val a = lazyUnit(42 + 1)
       val fa = Range(1, threads + 1).foldLeft(a)((b, i) => fork(b))
@@ -102,5 +102,9 @@ object Chapter7 {
     }
 
   }
+
+}
+
+object Chapter7Nonblocking {
 
 }

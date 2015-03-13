@@ -3,14 +3,13 @@
  */
 
 import java.util.concurrent.{TimeoutException, Executors}
-
 import org.scalatest.{Matchers, FlatSpec}
-import fp.Chapter7._
-import fp.Chapter7.Par._
-
 import scala.concurrent.duration._
 
-class Chapter7Spec extends FlatSpec with Matchers {
+class Chapter7BlockingSpec extends FlatSpec with Matchers {
+  import fp.Chapter7Blocking._
+  import fp.Chapter7Blocking.Par._
+
   def sleepInt(a: Int, duration: Duration): Par[Int] = lazyUnit({Thread.sleep(duration.toMillis); a})
 
   "map2" should "map correctly" in {
