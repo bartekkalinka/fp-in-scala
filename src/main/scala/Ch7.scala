@@ -12,6 +12,9 @@ object Chapter7 {
 
   object Par {
 
+    def equal[A](e: ExecutorService)(p: Par[A], p2: Par[A]): Boolean =
+      p(e).get == p2(e).get
+
     private case class UnitFuture[A](get: A) extends Future[A] {
       def isDone = true
       def get(timeout: Long, units: TimeUnit) = get
@@ -80,6 +83,23 @@ object Chapter7 {
     import Par._
 
     def sleepPrintPar(a: String, duration: Duration): Par[Unit] = lazyUnit({Thread.sleep(duration.toMillis); println(a)})
+
+    //fp.Chapter7.TestPar.deadlockDemo1(2) returns true
+    //fp.Chapter7.TestPar.deadlockDemo1(1) hangs
+    def deadlockDemo1(threads: Int) = {
+      val a = lazyUnit(42 + 1)
+      val S = Executors.newFixedThreadPool(threads)
+      println(Par.equal(S)(a, fork(a)))
+    }
+
+    //7.9
+    //fp.Chapter7.TestPar.deadlockDemo2(4) hangs
+    def deadlockDemo2(threads: Int) = {
+      val a = lazyUnit(42 + 1)
+      val fa = Range(1, threads + 1).foldLeft(a)((b, i) => fork(b))
+      val es = Executors.newFixedThreadPool(threads)
+      println(fa(es).get)
+    }
 
   }
 
