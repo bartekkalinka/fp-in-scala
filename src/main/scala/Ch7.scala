@@ -75,19 +75,11 @@ object Chapter7 {
 
   }
 
+  //for console tests
   object TestPar {
     import Par._
 
     def sleepPrintPar(a: String, duration: Duration): Par[Unit] = lazyUnit({Thread.sleep(duration.toMillis); println(a)})
-
-    //TODO move to scalatest
-    //sequence parallelism test
-    //Chapter7.TestPar.test1(4)
-    def test1(threads: Integer) = {
-      val es = Executors.newFixedThreadPool(threads)
-      val list = Range(1, 5).map(i => sleepPrintPar(i.toString, Duration((5 - i) * 100 + 4000, "millis"))).toList
-      sequence(list)(es)
-    }
 
   }
 

@@ -25,6 +25,14 @@ class Chapter7Spec extends FlatSpec with Matchers {
     an [TimeoutException] should be thrownBy par(es).get(140, MILLISECONDS)
   }
 
+  "sequence" should "work in parallel" in {
+    val es = Executors.newFixedThreadPool(4)
+    val list = Range(1, 5).map(i => sleepInt(i, Duration(150, "millis"))).toList
+    val par = sequence(list)
+    noException should be thrownBy par(es).get(170, MILLISECONDS)
+    an [TimeoutException] should be thrownBy par(es).get(140, MILLISECONDS)
+  }
+
   "parFilter" should "filter a list correctly" in {
     val es = Executors.newFixedThreadPool(12)
     val par = parFilter(List(1, 2, 3, 4, 5, 6))({a => a % 2 == 0})
