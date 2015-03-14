@@ -98,8 +98,15 @@ object Chapter7Nonblocking {
     //test of exception handling
     //fp.Chapter7Nonblocking.TestPar.testException
     def testException = {
-      val p = lazyUnit({throw new Exception("test")})
+      val p = fork(unit({throw new Exception("test")}))
       val x = run(Executors.newFixedThreadPool(1))(p)
+    }
+
+    //to better understand problem with exception handling
+    //fp.Chapter7Nonblocking.TestPar.testException2
+    def testException2 = {
+      val es = Executors.newFixedThreadPool(1)
+      es.submit(new Callable[Unit] { def call = {throw new Exception("test")} })
     }
   }
 }
