@@ -3,11 +3,8 @@
  */
 package fp
 
-import java.util.concurrent.atomic.AtomicReference
-import scala.collection.parallel.immutable.ParMap
 import scala.concurrent.duration._
 import java.util.concurrent._
-import fp.parallelism.Actor
 
 object Chapter7Blocking {
 
@@ -108,69 +105,3 @@ object Chapter7Blocking {
 
 }
 
-object Chapter7Nonblocking {
-  sealed trait Future[+A] {
-    private[fp] def apply(k: A => Unit): Unit
-  }
-  type Par[+A] = ExecutorService => Future[A]
-
-  object Par {
-    def run[A](es: ExecutorService)(p: Par[A]): A = {
-      val ref = new AtomicReference[A]
-      val latch = new CountDownLatch(1)
-      p(es) { a => ref.set(a); latch.countDown}
-      latch.await
-      ref.get
-    }
-
-    def unit[A](a: A): Par[A] =
-      es => new Future[A] {
-        def apply(cb: A => Unit): Unit =
-          cb(a)
-      }
-
-    def fork[A](a: => Par[A]): Par[A] =
-      es => new Future[A] {
-        def apply(cb: A => Unit): Unit =
-          eval(es)(a(es)(cb))
-      }
-
-    def eval(es: ExecutorService)(r: => Unit): Unit =
-      es.submit(new Callable[Unit] { def call = r })
-
-    def map2[A,B,C](p: Par[A], p2: Par[B])(f: (A,B) => C): Par[C] =
-      es => new Future[C] {
-        def apply(cb: C => Unit): Unit = {
-          var ar: Option[A] = None
-          var br: Option[B] = None
-          val combiner = Actor[Either[A,B]](es) {
-            case Left(a) =>
-              if (br.isDefined) eval(es)(cb(f(a,br.get)))
-              else ar = Some(a)
-            case Right(b) =>
-              if (ar.isDefined) eval(es)(cb(f(ar.get,b)))
-              else br = Some(b)
-          }
-          p(es)(a => combiner ! Left(a))
-          p2(es)(b => combiner ! Right(b))
-        }
-      }
-
-    //TODO does not compile
-    def parMap[A,B](ps: List[A])(f: A => B): Par[List[B]] = fork {
-      val fbs: List[Par[B]] = ps.map(asyncF(f))
-      sequence(fbs)
-    }
-  }
-
-  //for console tests
-  object TestPar {
-    import Par._
-
-    def test1 = {
-      import java.util.concurrent.Executors
-      val p = parMap(List.range(1, 100000))(math.sqrt(_))
-      val x = run(Executors.newFixedThreadPool(2))(p)
-    }
-  }
-}
