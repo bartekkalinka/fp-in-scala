@@ -46,4 +46,25 @@ class Chapter7BlockingSpec extends FlatSpec with Matchers {
   }
 }
 
+class Chapter7NonblockingSpec extends FlatSpec with Matchers {
+  import fp.Chapter7Nonblocking.Par._
+
+  "parMap" should "map a list correctly" in {
+    val p = parMap(List.range(1, 10))(math.sqrt(_))
+    val x = fp.Chapter7Nonblocking.Par.run(Executors.newFixedThreadPool(2))(p)
+    x should be (List(1.0, 1.4142135623730951, 1.7320508075688772, 2.0, 2.23606797749979, 2.449489742783178, 2.6457513110645907, 2.8284271247461903, 3.0))
+  }
+
+  "fork(lazyunit)" should "not cause a deadlock on 1 thread" in {
+    val a = lazyUnit(42 + 1)
+    val S = Executors.newFixedThreadPool(1)
+    fp.Chapter7Nonblocking.Par.run(S)(fork(a)) should be (43)
+  }
+
+  "parallel calculation throwing an exception" should "result in throwing the exception to the outside" in {
+    val p = fork(unit({throw new Exception("test")}))
+    an [Exception] should be thrownBy fp.Chapter7Nonblocking.Par.run(Executors.newFixedThreadPool(1))(p)
+  }
+}
+
 
