@@ -11,28 +11,37 @@ import fp.parallelism.Actor
 
 object Chapter7Nonblocking {
   sealed trait Future[+A] {
-    private[fp] def apply(k: A => Unit): Unit
+    private[fp] def apply(k: Either[Exception, A] => Unit): Unit
   }
   type Par[+A] = ExecutorService => Future[A]
 
   object Par {
     def run[A](es: ExecutorService)(p: Par[A]): A = {
-      val ref = new AtomicReference[A]
+      val ref = new AtomicReference[Either[Exception, A]]
       val latch = new CountDownLatch(1)
-      p(es) { a => ref.set(a); latch.countDown}
+      p(es) { ea => ref.set(ea); latch.countDown }
       latch.await
-      ref.get
+      ref.get match {
+        case Right(a) => a
+        case Left(e) => throw e
+      }
     }
 
-    def unit[A](a: A): Par[A] =
+    def unit[A](a: => A): Par[A] =
       es => new Future[A] {
-        def apply(cb: A => Unit): Unit =
-          cb(a)
+        def apply(cb: Either[Exception, A] => Unit): Unit = {
+          try {
+            cb(Right(a))
+          }
+          catch {
+            case e: Exception => cb(Left(e))
+          }
+        }
       }
 
     def fork[A](a: => Par[A]): Par[A] =
       es => new Future[A] {
-        def apply(cb: A => Unit): Unit =
+        def apply(cb: Either[Exception, A] => Unit): Unit =
           eval(es)(a(es)(cb))
       }
 
@@ -41,19 +50,20 @@ object Chapter7Nonblocking {
 
     def map2[A,B,C](p: Par[A], p2: Par[B])(f: (A,B) => C): Par[C] =
       es => new Future[C] {
-        def apply(cb: C => Unit): Unit = {
+        def apply(cb: Either[Exception, C] => Unit): Unit = {
           var ar: Option[A] = None
           var br: Option[B] = None
-          val combiner = Actor[Either[A,B]](es) {
-            case Left(a) =>
-              if (br.isDefined) eval(es)(cb(f(a,br.get)))
+          val combiner = Actor[Either[Exception,Either[A,B]]](es) {
+            case Right(Left(a)) =>
+              if (br.isDefined) eval(es)(cb(Right(f(a,br.get))))
               else ar = Some(a)
-            case Right(b) =>
-              if (ar.isDefined) eval(es)(cb(f(ar.get,b)))
+            case Right(Right(b)) =>
+              if (ar.isDefined) eval(es)(cb(Right(f(ar.get,b))))
               else br = Some(b)
+            case Left(e) => eval(es)(cb(Left(e)))
           }
-          p(es)(a => combiner ! Left(a))
-          p2(es)(b => combiner ! Right(b))
+          p(es)({case Right(a) => combiner ! Right(Left(a)); case Left(e) => combiner ! Left(e)})
+          p2(es)({case Right(b) => combiner ! Right(Right(b)); case Left(e) => combiner ! Left(e)})
         }
       }
 
