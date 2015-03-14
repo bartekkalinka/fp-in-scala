@@ -1,6 +1,6 @@
 package fp
 
-import java.util.concurrent.{Callable, CountDownLatch, ExecutorService}
+import java.util.concurrent.{Callable, CountDownLatch, ExecutorService, Executors}
 import java.util.concurrent.atomic.AtomicReference
 
 import fp.parallelism.Actor
@@ -82,10 +82,24 @@ object Chapter7Nonblocking {
 
     //fp.Chapter7Nonblocking.TestPar.test1
     def test1 = {
-      import java.util.concurrent.Executors
       val p = parMap(List.range(1, 10))(math.sqrt(_))
       val x = run(Executors.newFixedThreadPool(2))(p)
       println(x)
+    }
+
+    //test that there's no deadlock as with blocking implementation
+    //fp.Chapter7Nonblocking.TestPar.noDeadlockDemo1
+    def noDeadlockDemo1 = {
+      val a = lazyUnit(42 + 1)
+      val S = Executors.newFixedThreadPool(1)
+      println(run(S)(fork(a)))
+    }
+
+    //test of exception handling
+    //fp.Chapter7Nonblocking.TestPar.testException
+    def testException = {
+      val p = lazyUnit({throw new Exception("test")})
+      val x = run(Executors.newFixedThreadPool(1))(p)
     }
   }
 }
