@@ -76,6 +76,29 @@ object Chapter7Blocking {
         )
       )(_.flatten)
 
+    //7.11
+    def choiceN[A](n: Par[Int])(choices: List[Par[A]]): Par[A] = {
+      es =>
+        val choice = run(es)(n).get()
+        choices(choice)(es)
+    }
+
+    //7.13
+    def flatMap[A,B](a: Par[A])(f: A => Par[B]): Par[B] = {
+      es =>
+        val choice = run(es)(a).get()
+        f(choice)(es)
+    }
+
+    def choiceNfMap[A](n: Par[Int])(choices: List[Par[A]]): Par[A] = flatMap[Int, A](n)(choices(_))
+
+    //7.14
+    def join[A](a: Par[Par[A]]): Par[A] = es => a(es).get()(es)
+
+    def joinFmap[A](a: Par[Par[A]]): Par[A] = flatMap(a)(x => x)
+
+    def flatMapJoin[A,B](a: Par[A])(f: A => Par[B]): Par[B] = join(map(a)(f))
+
   }
 
   //for console tests

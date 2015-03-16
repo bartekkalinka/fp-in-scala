@@ -84,6 +84,29 @@ object Chapter7Nonblocking {
       val fbs: List[Par[B]] = ps.map(asyncF(f))
       sequence(fbs)
     }
+
+    //7.11
+    def choiceN[A](n: Par[Int])(choices: List[Par[A]]): Par[A] = {
+      es => new Future[A] {
+        def apply(cb: Either[Exception, A] => Unit) = {
+          n(es) {
+            case Right(nres) => choices(nres)(es)(cb)
+            case Left(e) => eval(es)(cb(Left(e)))
+          }
+        }
+      }
+    }
+
+    //7.14
+    def join[A](a: Par[Par[A]]): Par[A] = es =>
+      new Future[A] {
+        def apply(cb: Either[Exception, A] => Unit) = {
+          a(es) {
+            case Right(ares) => ares(es)(cb)
+            case Left(e) => eval(es)(cb(Left(e)))
+          }
+        }
+      }
   }
 
   //for console tests
