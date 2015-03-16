@@ -5,6 +5,7 @@ import org.scalacheck.{Gen, Properties}
 import org.scalacheck.Prop.{forAll, BooleanOperators}
 import scala.util.Random
 
+//8.1
 object ExampleScalaCheckSpec extends Properties("List.sum") {
 
   property("reverse is neutral") = forAll { (xs: List[Int]) =>
@@ -26,6 +27,7 @@ object ExampleScalaCheckSpec extends Properties("List.sum") {
 
 }
 
+//8.2
 object ExampleScalaCheckSpec2 extends Properties("List.max") {
 
   property("reverse is neutral") = forAll { (xs: List[Int]) =>
