@@ -5,7 +5,7 @@
 package fp
 
 object Chapter8 {
-  import Chapter6.{State, RNG}
+  import Chapter6.{State, RNG, Rand}
 
   case class Gen[A](sample: State[RNG,A])
 
@@ -21,7 +21,10 @@ object Chapter8 {
     //def forAll[A](a: Gen[A])(f: A => Boolean): Prop
 
     //8.4
-    def choose(start: Int, stopExclusive: Int): Gen[Int] = Gen({rng: RNG => rng.nextInt(stopExclusive - start) + start }) //TODO
+    def choose(start: Int, stopExclusive: Int): Gen[Int] =
+      Gen[Int](State[RNG, Int]({
+        rng: RNG => Chapter6.nonNegativeLessThan(stopExclusive - start)(rng) + start
+      }))
 
 
   }
