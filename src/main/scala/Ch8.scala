@@ -21,12 +21,19 @@ object Chapter8 {
     //def forAll[A](a: Gen[A])(f: A => Boolean): Prop
 
     //8.4
+
+    //type Rand[+A] = RNG => (A, RNG)
+    //def nonNegativeLessThan(n: Int): Rand[Int]
+    //Rand[Int] is (RNG => (Int, RNG))
+    //case class State[S,+A](run: S => (A,S))
     def choose(start: Int, stopExclusive: Int): Gen[Int] =
       Gen[Int](State[RNG, Int]({
-        rng: RNG => Chapter6.nonNegativeLessThan(stopExclusive - start)(rng) + start
+        rng: RNG => {
+          val (num, rngAfter) = Chapter6.nonNegativeLessThan(stopExclusive - start)(rng)
+          (num + start, rngAfter)
+        }
       }))
-
-
   }
+
 }
 
