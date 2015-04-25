@@ -7,7 +7,13 @@ package fp
 object Chapter8 {
   import Chapter6.{State, RNG}
 
-  case class Gen[A](sample: State[RNG,A])
+  case class Gen[A](sample: State[RNG,A]) {
+    //8.6
+    def flatMap[B](f: A => Gen[B]): Gen[B] =
+      Gen(sample.flatMap((a: A) => f(a).sample))
+
+    def listOfN(size: Gen[Int]): Gen[List[A]] = size.flatMap((n: Int) => Gen.listOfN(n, this))
+  }
 
   trait Prop {
     def check: Boolean
@@ -49,6 +55,9 @@ object Chapter8 {
     def listOfN[A](n: Int, g: Gen[A]): Gen[List[A]] = Gen(
       State.sequence[RNG, A](List.fill[State[RNG, A]](n)(g.sample))
     )
+
+    //8.6
+
   }
 
 }
